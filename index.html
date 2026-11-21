@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#174f7c">
+<meta name="description" content="덕트 재질별 조도와 덕트 길이를 반영한 산업환기 직관 마찰 압력손실 계산기">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png"><title>산업환기 덕트 압력손실 계산기</title>
+<style>
+:root{--navy:#174f7c;--blue:#2879ae;--ink:#1e293b;--muted:#64748b;--line:#e2e8f0;--bg:#f3f6fa}
+*{box-sizing:border-box}body{margin:0;padding:15px 11px 35px;background:var(--bg);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:var(--ink)}.wrap{max-width:760px;margin:auto}
+header{background:linear-gradient(135deg,#174f7c,#2879ae);color:white;padding:23px 19px;border-radius:18px}header small{letter-spacing:1px;opacity:.85;font-weight:700}h1{font-size:23px;margin:7px 0}header p{font-size:12px;line-height:1.6;margin:0;opacity:.9}
+.panel{background:white;border:1px solid #e9eef4;border-radius:16px;padding:17px;margin-top:14px;box-shadow:0 4px 15px #10243b08}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;background:#e8edf3;padding:5px;border-radius:12px;margin-top:14px}
+button{border:0;border-radius:10px;padding:13px;font-size:14px;font-weight:750;cursor:pointer}.tab{background:transparent;color:#475569}.tab.active{background:white;color:var(--navy);box-shadow:0 1px 5px #0f172a18}
+h2{font-size:16px;margin:0 0 13px}.sub{font-size:12px;color:var(--muted);line-height:1.5;margin:-5px 0 13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin-bottom:12px}label{display:block;font-size:13px;font-weight:750;margin-bottom:6px}
+.inputrow,select{width:100%;border:1px solid #cbd5e1;border-radius:10px;background:white;min-height:47px}input{width:100%;min-width:0;border:0;outline:0;padding:12px;font-size:16px;font-weight:650;color:var(--ink);background:transparent}select{padding:11px;font-size:14px;color:var(--ink);font-weight:650}.inputrow{display:flex;overflow:hidden}.unit{display:flex;align-items:center;padding:0 10px;background:#f8fafc;border-left:1px solid var(--line);font-size:11px;color:var(--muted);white-space:nowrap}
+.hint,.note{font-size:11px;color:var(--muted);line-height:1.6;margin-top:5px}.calc{width:100%;background:var(--navy);color:white;margin-top:3px}.hidden{display:none!important}.error{display:none;background:#fff0ef;color:#a52a22;border-radius:9px;padding:10px;font-size:12px;margin-top:10px}
+.result{display:none}.hero{background:#eaf5ee;border:1px solid #cce8d4;padding:15px;border-radius:12px}.hero span{font-size:12px;color:#256b43;font-weight:750}.hero strong{display:block;font-size:30px;color:#12643a;margin-top:3px}.hero small{font-size:13px;font-weight:500}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.metric{background:#f3f6fa;border-radius:11px;padding:12px}.metric span{font-size:11px;color:var(--muted)}.metric b{display:block;font-size:19px;margin-top:4px;overflow-wrap:anywhere}
+h3{font-size:14px;margin:18px 0 9px}.steps{display:flex;flex-direction:column;gap:8px}.step{border:1px solid var(--line);border-radius:11px;padding:11px}.stephead{font-size:12px;font-weight:800;color:var(--navy);margin-bottom:5px}.formula{font-family:ui-monospace,monospace;font-size:12px;line-height:1.8;overflow-wrap:anywhere;color:#334155}.answer{font-weight:800;color:#0f5132}.info{background:#fff8e8;border:1px solid #f5dfad;border-radius:10px;padding:11px;font-size:11px;color:#75551a;line-height:1.6;margin-top:12px}
+.material-table{width:100%;border-collapse:collapse;font-size:12px}.material-table td,.material-table th{padding:8px 5px;border-bottom:1px solid var(--line);text-align:left}.material-table th{color:var(--muted)}
+@media(max-width:390px){.panel{padding:14px}h1{font-size:21px}.metric b{font-size:17px}}
+</style></head><body><div class="wrap">
+<header><small>INDUSTRIAL VENTILATION</small><h1>덕트 압력손실 계산기</h1><p>덕트 풍속 또는 풍량·속도압을 입력하고, 덕트 재질과 길이를 선택해 직관의 최종 마찰 압력손실을 계산합니다.</p></header>
+<div class="tabs"><button class="tab active" id="tab1">① 풍속 + 직경</button><button class="tab" id="tab2">② 풍량 + 속도압</button></div>
+<section class="panel" id="panel1"><h2>계산 조건 입력</h2><p class="sub">덕트 내 평균 풍속과 내경을 직접 입력합니다.</p>
+<div class="grid"><div class="field"><label for="v1">덕트 풍속 (V)</label><div class="inputrow"><input id="v1" type="number" min="0" step="any" value="15"><span class="unit">m/s</span></div></div><div class="field"><label for="d1">덕트 직경 (D)</label><div class="inputrow"><input id="d1" type="number" min="0" step="any" value="350"><span class="unit">mm</span></div></div></div>
+<div class="grid"><div class="field"><label for="mat1">덕트 종류</label><select id="mat1" class="material"></select></div><div class="field"><label for="len1">덕트 길이 (L)</label><div class="inputrow"><input id="len1" type="number" min="0" step="any" value="10"><span class="unit">m</span></div></div></div>
+<div class="field flexrough hidden" id="flex1"><label for="rough1">플렉시블 덕트 조도 선택</label><select id="rough1"><option value="0.7">0.7 mm</option><option value="0.95">0.95 mm</option><option value="1.2" selected>1.2 mm (보수적 적용)</option></select></div>
+<button class="calc" id="calc1">최종 압력손실 계산</button><div class="error" id="err1"></div></section>
+<section class="panel hidden" id="panel2"><h2>계산 조건 입력</h2><p class="sub">풍량과 속도압을 입력합니다. 공기 밀도로 풍속을 역산하고 풍량으로 덕트 직경을 계산합니다.</p>
+<div class="grid"><div class="field"><label for="q2">풍량 (Q)</label><div class="inputrow"><input id="q2" type="number" min="0" step="any" value="120"><span class="unit">㎥/min</span></div></div><div class="field"><label for="vp2">속도압 (VPd)</label><div class="inputrow"><input id="vp2" type="number" min="0" step="any" value="135"><span class="unit">Pa</span></div></div></div>
+<div class="grid"><div class="field"><label for="mat2">덕트 종류</label><select id="mat2" class="material"></select></div><div class="field"><label for="len2">덕트 길이 (L)</label><div class="inputrow"><input id="len2" type="number" min="0" step="any" value="10"><span class="unit">m</span></div></div></div>
+<div class="field flexrough hidden" id="flex2"><label for="rough2">플렉시블 덕트 조도 선택</label><select id="rough2"><option value="0.7">0.7 mm</option><option value="0.95">0.95 mm</option><option value="1.2" selected>1.2 mm (보수적 적용)</option></select></div>
+<button class="calc" id="calc2">최종 압력손실 계산</button><div class="error" id="err2"></div></section>
+<section class="panel result" id="result" aria-live="polite"><h2>계산 결과</h2><div class="hero"><span>덕트 전체 직관 마찰 압력손실</span><strong><i id="loss">-</i> <small>Pa</small></strong></div>
+<div class="metrics"><div class="metric"><span>덕트 풍속</span><b id="outV">-</b></div><div class="metric"><span>계산 덕트 직경</span><b id="outD">-</b></div><div class="metric"><span>레이놀즈수 (Re)</span><b id="outRe">-</b></div><div class="metric"><span>상대조도 (e/D)</span><b id="outRel">-</b></div><div class="metric"><span>마찰손실계수 (f)</span><b id="outF">-</b></div><div class="metric"><span>속도압 (VPd)</span><b id="outVP">-</b></div><div class="metric"><span>덕트 길이</span><b id="outL">-</b></div><div class="metric"><span>표면조도</span><b id="outE">-</b></div></div>
+<h3>계산 과정 — 실제 값 대입</h3><div class="steps" id="steps"></div><div class="info" id="assumption"></div><p class="note">본 계산은 원형 직관의 마찰손실만 계산합니다. 엘보, 티, 댐퍼, 후드, 확대·축소부 및 공기정화장치 등의 국부손실·장치손실은 포함하지 않습니다.</p></section>
+<section class="panel"><h2>적용 기준 및 덕트 재질별 조도</h2><div class="formula">Re = ρVD / μ<br>상대조도 = e/D<br>f = 0.0055 × {1 + [20,000(e/D) + 10⁶/Re]^(1/3)}<br>VPd = ρV² / 2<br>ΔP = f × (L/D) × VPd</div>
+<table class="material-table"><tr><th>덕트 재질</th><th>조도 e (mm)</th></tr><tr><td>주물 강관</td><td>0.26</td></tr><tr><td>도금강관</td><td>0.15</td></tr><tr><td>흑피 강관</td><td>0.12</td></tr><tr><td>스테인리스 스틸</td><td>0.05</td></tr><tr><td>PVC, Glass</td><td>0.0015</td></tr><tr><td>플렉시블 덕트</td><td>0.7~1.2</td></tr></table>
+<p class="note">기본 가정: 공기 밀도 ρ=1.2 kg/m³, 점성계수 μ=0.0000181 Pa·s. 표의 조도값을 적용했습니다. 실제 조도는 제품별 차이가 있으므로 현장 자료와 제조사 사양을 확인하세요. 플렉시블 덕트는 기본 1.2mm를 적용하며 선택 변경할 수 있습니다.</p></section>
+<footer>산업환기 계산 보조 도구 · DUCT PRESSURE LOSS</footer></div>
+<script>
+const $=id=>document.getElementById(id), RHO=1.2, MU=0.0000181;
+const materials=[["주물 강관",0.26],["도금강관",0.15],["흑피 강관",0.12],["스테인리스 스틸",0.05],["PVC, Glass",0.0015],["플렉시블 덕트",1.2]];
+document.querySelectorAll(".material").forEach(s=>{s.innerHTML=materials.map((m,i)=>`<option value="${m[1]}" data-index="${i}">${m[0]} (e=${m[1]}${i===5?" 기본":""} mm)</option>`).join("");});
+function bindFlex(sel,box){$(sel).addEventListener("change",()=>$(box).classList.toggle("hidden",$(sel).selectedIndex!==5));}
+bindFlex("mat1","flex1");bindFlex("mat2","flex2");
+const fmt=(x,n=4)=>Number(x).toLocaleString("ko-KR",{maximumFractionDigits:n});
+function showError(id,msg){$(id).textContent=msg;$(id).style.display="block";$("result").style.display="none";}
+function step(title,formula){return `<div class="step"><div class="stephead">${title}</div><div class="formula">${formula}</div></div>`;}
+function run(V,D,L,e,source,matName,Q){
+ if(!(V>0&&D>0&&L>=0&&e>=0)){return;}
+ const Re=RHO*V*D/MU, rel=(e/1000)/D, f=.0055*(1+Math.pow(20000*rel+1e6/Re,1/3)), VP=RHO*V*V/2, loss=f*(L/D)*VP, q=Q??(V*Math.PI*D*D/4*60);
+ $("loss").textContent=fmt(loss,3);$("outV").textContent=fmt(V,3)+" m/s";$("outD").textContent=fmt(D*1000,2)+" mm";$("outRe").textContent=fmt(Re,0);$("outRel").textContent=fmt(rel,8);$("outF").textContent=fmt(f,7);$("outVP").textContent=fmt(VP,3)+" Pa";$("outL").textContent=fmt(L,2)+" m";$("outE").textContent=fmt(e,4)+" mm";
+ const s=[];
+ if(source===2){s.push(step("1. 풍량 단위 변환",`Q = ${fmt(Q,4)} ㎥/min ÷ 60 = ${fmt(Q/60,6)} ㎥/s`));s.push(step("2. 속도압으로 풍속 계산",`VPd = ρV²/2<br>V = √(2 × VPd / ρ) = √(2 × ${fmt(VP,4)} / ${RHO})<br><span class="answer">V = ${fmt(V,5)} m/s</span>`));s.push(step("3. 풍량으로 덕트 직경 계산",`D = √(4Q / πV)<br>D = √(4 × ${fmt(Q/60,6)} / (π × ${fmt(V,5)}))<br><span class="answer">D = ${fmt(D*1000,3)} mm</span>`));}
+ else{s.push(step("1. 입력값 및 단위 변환",`V = ${fmt(V,5)} m/s<br>D = ${fmt(D*1000,3)} mm = ${fmt(D,7)} m`));}
+ s.push(step((source===1?"2":"4")+". 레이놀즈수 계산",`Re = ρVD / μ<br>= ${RHO} × ${fmt(V,5)} × ${fmt(D,7)} / ${MU}<br><span class="answer">Re = ${fmt(Re,2)}</span>`));
+ s.push(step((source===1?"3":"5")+". 상대조도 계산",`e/D = ${fmt(e,4)} mm ÷ ${fmt(D*1000,4)} mm<br><span class="answer">e/D = ${fmt(rel,8)}</span>`));
+ s.push(step((source===1?"4":"6")+". 마찰손실계수 계산",`f = 0.0055 × {1 + [20,000(e/D) + 10⁶/Re]^(1/3)}<br>= 0.0055 × {1 + [20,000 × ${fmt(rel,8)} + 1,000,000 / ${fmt(Re,2)}]^(1/3)}<br><span class="answer">f = ${fmt(f,7)}</span>`));
+ s.push(step((source===1?"5":"7")+". 속도압 계산",`VPd = ρV² / 2<br>= ${RHO} × ${fmt(V,5)}² / 2<br><span class="answer">VPd = ${fmt(VP,5)} Pa</span>`));
+ s.push(step((source===1?"6":"8")+". 덕트 전체 길이의 압력손실",`ΔP = f × (L/D) × VPd<br>= ${fmt(f,7)} × (${fmt(L,3)} / ${fmt(D,7)}) × ${fmt(VP,5)}<br><span class="answer">ΔP = ${fmt(loss,5)} Pa</span>`));
+ $("steps").innerHTML=s.join("");$("assumption").textContent=`적용 덕트: ${matName} / 절대조도 e=${e} mm / 길이 L=${L} m. 공기 밀도 ρ=${RHO} kg/m³, 점성계수 μ=${MU} Pa·s. 계산 풍량은 ${fmt(q,3)} ㎥/min입니다.`;
+ $("result").style.display="block";$("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function getMat(which){const s=$("mat"+which),idx=s.selectedIndex;return {name:materials[idx][0],e:idx===5?Number($("rough"+which).value):Number(s.value)};}
+$("calc1").addEventListener("click",()=>{const v=Number($("v1").value),d=Number($("d1").value)/1000,L=Number($("len1").value),m=getMat(1);$("err1").style.display="none";if(!(v>0&&d>0&&L>=0&&[v,d,L,m.e].every(Number.isFinite))){showError("err1","풍속과 직경은 0보다 크게, 덕트 길이는 0 이상으로 입력하세요.");return;}run(v,d,L,m.e,1,m.name);});
+$("calc2").addEventListener("click",()=>{const Q=Number($("q2").value),VP=Number($("vp2").value),L=Number($("len2").value),m=getMat(2);$("err2").style.display="none";if(!(Q>0&&VP>0&&L>=0&&[Q,VP,L,m.e].every(Number.isFinite))){showError("err2","풍량과 속도압은 0보다 크게, 덕트 길이는 0 이상으로 입력하세요.");return;}const V=Math.sqrt(2*VP/RHO),D=Math.sqrt(4*(Q/60)/ (Math.PI*V));run(V,D,L,m.e,2,m.name,Q);});
+function tab(i){[1,2].forEach(n=>{$("panel"+n).classList.toggle("hidden",n!==i);$("tab"+n).classList.toggle("active",n===i);});$("result").style.display="none";}
+$("tab1").onclick=()=>tab(1);$("tab2").onclick=()=>tab(2);
+</script>
+<script>
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(err => {
+      console.error("서비스 워커 등록 실패:", err);
+    });
+  });
+}
+</script>
+
+</body></html>
